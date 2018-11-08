@@ -56,7 +56,7 @@ public class Main {
                 }
                 int flr = (int)ele[3];
                 // 階層ごとにファイル追加
-                Logger.OutputFileLog(new String(dir + "/" + dir + "_" + flr + ".csv"), new String(line + System.getProperty("line.separator")), true);
+                Logger.OutputFileLog(new String(dir + "/" + dir + "_" + flr + "flr.csv"), new String(line + System.getProperty("line.separator")), true);
                 
                 line = br.readLine();
             }
