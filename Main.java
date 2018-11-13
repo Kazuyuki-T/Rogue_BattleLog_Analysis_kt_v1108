@@ -85,6 +85,9 @@ public class Main {
                         btCount++;
                         addLine = true;
                     }
+                    else{
+                        addLine = false;
+                    }
                     
                     // ゲーム回数更新
                     if(btCount == 2){
