@@ -77,7 +77,10 @@ public class Main {
                 }
                 else if(mode == 10){ // 2f限定，最初の2回のみ抽出
                     int gc = (int)ele[0]; // ゲームカウント
-                    if(gc - gameCountBefore >= 2) btCount = 0; // 前回のゲームカウントとの差が2以上の時
+                    if(gc - gameCountBefore >= 2){ // 前回のゲームカウントとの差が2以上の時
+                        gameCountBefore = gc - 1;
+                        btCount = 0;
+                    }
                     
                     // ゲーム回数比較，異なっているときのみ記録
                     if(gameCountBefore != gc){
