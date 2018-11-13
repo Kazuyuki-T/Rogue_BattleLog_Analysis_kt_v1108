@@ -54,7 +54,7 @@ public class Main {
             double[] ele; // コンマ分割数字列，配列格納
             boolean addLine; // 追記するか否か
             
-            int gameCount = -1; // 何ゲーム分の記録か
+            int gameCountBefore = -1; // 前回記録したゲームカウント
             int btCount = 0; // 同じゲームカウントでの戦闘回数記録，2回以上で次のゲームカウントへ
             
             for(int row = 0; line != null; row++){
@@ -77,10 +77,10 @@ public class Main {
                 }
                 else if(mode == 10){ // 2f限定，最初の2回のみ抽出
                     int gc = (int)ele[0]; // ゲームカウント
-                    if(gameCount < gc) btCount = 0;
+                    if(gc - gameCountBefore >= 2) btCount = 0; // 前回のゲームカウントとの差が2以上の時
                     
                     // ゲーム回数比較，異なっているときのみ記録
-                    if(gameCount != gc){
+                    if(gameCountBefore != gc){
                         outputFilename = new File(new String(dir + "/" + dir + "_extracted1bt.csv"));
                         btCount++;
                         addLine = true;
@@ -91,7 +91,7 @@ public class Main {
                     
                     // ゲーム回数更新
                     if(btCount == 2){
-                        gameCount = gc;
+                        gameCountBefore = gc;
                         btCount = 0;
                     }
                 }
