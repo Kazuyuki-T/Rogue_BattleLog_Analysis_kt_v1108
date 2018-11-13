@@ -18,11 +18,19 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) {
         // csv読み込みに使用
+        String csvNames = "log_20181017_003052_bt.csv,log_20181017_002824_bt.csv";
+        //String csvFile = "test1.csv";
+        int mode = 0;
         
-        
-        String csvFile = "test1.csv";
-        
-        
+        String[] csvName = csvNames.split(",", 0);
+        for(int i=0; i < csvName.length; i++){
+            System.out.println("start - " + csvName[i]);
+            divideCsvFile(csvName[i], mode);
+            System.out.println("end - " + csvName[i]);
+        }
+    }
+    
+    public static void divideCsvFile(String csvFile, int mode){
         // 格納フォルダの作成
         String[] csvName = csvFile.split("\\.", 0);
         File dir = new File(csvName[0]);
@@ -30,35 +38,72 @@ public class Main {
             // succece
         } else {
             System.out.println("フォルダの作成に失敗しました");
+            System.exit(0);
         }
         
         BufferedReader br = null; // 読み込み文章
         String line = ""; // 1行分
-        try {
-            File fname = new File(csvFile);
-            br = new BufferedReader(new FileReader(fname));
+        String index = ""; // csvの先頭要素
+        try { // 入力ファイル
+            File inputFilename = new File(csvFile); // 入力ファイル
+            File outputFilename = null; // 出力ファイル
+            br = new BufferedReader(new FileReader(inputFilename)); // 入力ファイルの読み込みバッファー
+            index = br.readLine(); // 1行ずつ読み込み
             line = br.readLine(); // 1行ずつ読み込み
+            String[] lineSp; // コンマ分割文字列，配列格納
+            double[] ele; // コンマ分割数字列，配列格納
+            boolean addLine; // 追記するか否か
             
-            // ここでlineには要素のインデックスが入る
-            for(int fn = 0; fn < 4; fn++){
-                Logger.OutputFileLog(new String(dir + "/" + dir + "_" + fn + "flr.csv"), new String(line + System.getProperty("line.separator")), true);
-            }
+            int gameCount = -1; // 何ゲーム分の記録か
+            int btCount = 0; // 同じゲームカウントでの戦闘回数記録，2回以上で次のゲームカウントへ
             
-            line = br.readLine(); // 1行ずつ読み込み
-            String[] lineSp;
-            double[] ele;
             for(int row = 0; line != null; row++){
                 lineSp = line.split(",", 0);
                 ele = new double[22]; // gn,rn,dn,flr,hp,lv,sp,pt,ar,st,getflritem,getflrfd,getflrpt,getflrar,getflrst,getallitem,unk,st,br,cfc,nfc,gc
+                addLine = true;
                 
                 for(int i = 0; i < lineSp.length ; i++){
                     ele[i] = Double.parseDouble(lineSp[i]);
                 }
-                int flr = (int)ele[3];
-                // 階層ごとにファイル追加
-                Logger.OutputFileLog(new String(dir + "/" + dir + "_" + flr + "flr.csv"), new String(line + System.getProperty("line.separator")), true);
+                
+                if(mode == 0){ // 階層ごとに分割
+                    int flr = (int)ele[3];
+                    // ファイルが存在しないとき，初期作成＆インデックス追加
+                    outputFilename = new File(new String(dir + "/" + dir + "_" + flr + "flr.csv"));
+                }
+                else if(mode == 1){ // 矢の個数毎に分割
+                    int arn = (int)ele[8];
+                    outputFilename = new File(new String(dir + "/" + dir + "_" + arn + "ar.csv"));
+                }
+                else if(mode == 10){ // 2f限定，最初の2回のみ抽出
+                    int gc = (int)ele[0]; // ゲームカウント
+                    if(gameCount < gc) btCount = 0;
+                    
+                    // ゲーム回数比較，異なっているときのみ記録
+                    if(gameCount != gc){
+                        outputFilename = new File(new String(dir + "/" + dir + "_extracted1bt.csv"));
+                        btCount++;
+                        addLine = true;
+                    }
+                    
+                    // ゲーム回数更新
+                    if(btCount == 2){
+                        gameCount = gc;
+                        btCount = 0;
+                    }
+                }
+                else{
+                    addLine = false;
+                }
+                
+                if(addLine == true){
+                    // ファイルが存在しないとき→ラベル付け，存在する→追記
+                    if(outputFilename.exists() == false) Logger.OutputFileLog(outputFilename.toString(), new String(index + System.getProperty("line.separator")), true);
+                    Logger.OutputFileLog(outputFilename.toString(), new String(line + System.getProperty("line.separator")), true);
+                }
                 
                 line = br.readLine();
+                if(row % 1000 == 0 || line == null) System.out.println("row : " + row);
             }
             
             br.close();
