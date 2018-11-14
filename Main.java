@@ -18,7 +18,7 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) {
         // csv読み込みに使用
-        String csvNames = "log_20181017_003052_bt.csv,log_20181017_002824_bt.csv";
+        String csvNames = "log_20181008_183343_bt.csv";
         //String csvFile = "test1.csv";
         int mode = 0;
         
