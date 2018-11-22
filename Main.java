@@ -103,6 +103,17 @@ public class Main {
                         btCount = 0;
                     }
                 }
+                else if(mode == 20){ // 勝率計算
+                    int gc = (int)ele[0]; // ゲームカウント
+                    if(gameCountBefore != gc){
+                        
+                        addLine = true;
+                    }
+                    else{
+                        addLine = false;
+                    }
+                    
+                }
                 else{
                     addLine = false;
                 }
