@@ -16,11 +16,14 @@ import java.io.IOException;
  * @author Kazuyuki.T
  */
 public class Main {
+    
+    public static final int BATTLELOG_LIMIT_N = 2;
+    
     public static void main(String[] args) {
         // csv読み込みに使用
-        String csvNames = "log_20181017_003052_bt.csv,log_20181017_002824_bt.csv";
+        String csvNames = "log_20181122_174913_bt_2flr.csv,log_20181122_174901_bt_2flr.csv";
         //String csvFile = "test1.csv";
-        int mode = 0;
+        int mode = 10;
         
         String[] csvName = csvNames.split(",", 0);
         for(int i=0; i < csvName.length; i++){
@@ -80,7 +83,15 @@ public class Main {
                     int arn = (int)ele[8];
                     outputFilename = new File(new String(dir + "/" + dir + "_" + arn + "ar.csv"));
                 }
-                else if(mode == 10){ // 2f限定，最初の2回のみ抽出
+                else if(mode == 2){ // 回復薬の個数毎に分割
+                    int ptn = (int)ele[7];
+                    outputFilename = new File(new String(dir + "/" + dir + "_" + ptn + "pt.csv"));
+                }
+                else if(mode == 3){ // 杖の個数毎に分割
+                    int stn = (int)ele[9];
+                    outputFilename = new File(new String(dir + "/" + dir + "_" + stn + "st.csv"));
+                }
+                else if(mode == 10){ // 同フロア中最初の BATTLELOG_LIMIT_N バトルのみ抽出
                     int gc = (int)ele[0]; // ゲームカウント
                     if(gc - gameCountBefore >= 2){ // 前回のゲームカウントとの差が2以上の時
                         gameCountBefore = gc - 1;
@@ -89,7 +100,7 @@ public class Main {
                     
                     // ゲーム回数比較，異なっているときのみ記録
                     if(gameCountBefore != gc){
-                        outputFilename = new File(new String(dir + "/" + dir + "_extracted1bt.csv"));
+                        outputFilename = new File(new String(dir + "/" + dir + "_extracted" + BATTLELOG_LIMIT_N + "bt.csv"));
                         btCount++;
                         addLine = true;
                     }
@@ -98,7 +109,7 @@ public class Main {
                     }
                     
                     // ゲーム回数更新
-                    if(btCount == 2){
+                    if(btCount == BATTLELOG_LIMIT_N){
                         gameCountBefore = gc;
                         btCount = 0;
                     }
