@@ -123,7 +123,7 @@ public class EditCsvFile {
                     // 前の記録ゲーム数と異なるとき，ゲーム数及び勝利数をカウント
                     if(gameCountBefore != gc){
                         gamelog.gameCounter();
-                        gamelog.winCounter();
+                        if(gametf == 1) gamelog.winCounter();
                     }
                     
                     map.put(itemnun, gamelog); // 上書き
@@ -147,6 +147,8 @@ public class EditCsvFile {
             }
             
             if(mode == 20){ // ゲーム数・勝率等の出力
+                outputFilename = new File(new String(dir + "/" + dir + "_result.csv"));
+
                 // ファイルが存在しないとき→ラベル付け，存在する→追記
                 String resultIndex = "ar,datanum,posnum,negnum,gamenum,winnum,losenum";
                 StringBuilder stb_main = new StringBuilder();

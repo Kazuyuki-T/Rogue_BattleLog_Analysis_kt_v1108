@@ -19,9 +19,9 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) {
         // csv読み込みに使用
-        String csvNames = "log_20181122_203453_bt.csv";
+        String csvNames = "log_20181122_203453_bt_2flr.csv";
         //String csvFile = "test1.csv";
-        int mode = 0;
+        int mode = 20;
         int btLimit = -1; // mode=10で必要，記録する同フロア戦闘数制限
         
         EditCsvFile ecf = new EditCsvFile();
