@@ -19,9 +19,17 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) {
         // csv読み込みに使用
-        String csvNames = "log_20181122_203453_bt_2flr.csv";
+        String csvNames = "log_20181122_203209_bt.csv,log_20181122_203220_bt.csv,log_20181122_203448_bt.csv,log_20181122_204954_bt.csv";
         //String csvFile = "test1.csv";
-        int mode = 20;
+        
+        // mode 0 : 階層ごとに分割
+        // mode 1 : 矢の個数毎に分割
+        // mode 2 : 回復薬の個数毎に分割
+        // mode 3 : 杖の個数毎に分割
+        // mode10 : 同フロア中最初の BATTLELOG_LIMIT_N バトルのみ抽出
+        // mode20 : csv分割なし，矢の個数ごとにデータ数，正例数，ゲーム数，勝利数をカウント
+        
+        int mode = 0;
         int btLimit = -1; // mode=10で必要，記録する同フロア戦闘数制限
         
         EditCsvFile ecf = new EditCsvFile();
