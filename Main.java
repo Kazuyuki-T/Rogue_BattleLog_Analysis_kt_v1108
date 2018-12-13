@@ -19,7 +19,9 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) {
         // csv読み込みに使用
-        String csvNames = "log_20181122_203209_bt.csv,log_20181122_203220_bt.csv,log_20181122_203448_bt.csv,log_20181122_204954_bt.csv";
+        String csvNames = 
+                  "data_2f_gameclear_newData_onehot_allitem.csv";
+
         //String csvFile = "test1.csv";
         
         // mode 0 : 階層ごとに分割
@@ -28,8 +30,22 @@ public class Main {
         // mode 3 : 杖の個数毎に分割
         // mode10 : 同フロア中最初の BATTLELOG_LIMIT_N バトルのみ抽出
         // mode20 : csv分割なし，矢の個数ごとにデータ数，正例数，ゲーム数，勝利数をカウント
+        // mode21 : csv分割なし，薬の個数ごとにデータ数，正例数，ゲーム数，勝利数をカウント
+        // mode22 : csv分割なし，杖の個数ごとにデータ数，正例数，ゲーム数，勝利数をカウント
+        // mode30 : csv分割なし，読み込みresult.csvのデータ数集計
+        // 以降学習データの加工
+        // mode40 : csv分割なし, normal -> all onehot
+        // mode41 : csv分割なし, only pt onehot -> all item onehot
+        // mode42 : csv分割なし, only ar onehot -> all item onehot
+        // mode43 : csv分割なし, only st onehot -> all item onehot
+        // mode49 : csv分割なし, ラベル整数化
+        // mode50 : csv分割なし, only ar onehot -> + hp onehot(20刻み，5分割)
+        // mode51 : csv分割なし, all item onehot -> + hp onehot(20刻み，5分割)
+        // mode52 : csv分割なし, only ar onehot -> + hp onehot(10刻み，10分割)
+        // mode53 : csv分割なし, all item onehot -> + hp onehot(10刻み，10分割)
+        // mode60 : csv分割なし, all item onehot -> hp datanum,posrate count
         
-        int mode = 0;
+        int mode = 60;
         int btLimit = -1; // mode=10で必要，記録する同フロア戦闘数制限
         
         EditCsvFile ecf = new EditCsvFile();

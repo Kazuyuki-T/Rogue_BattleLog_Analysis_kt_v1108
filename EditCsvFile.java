@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -17,8 +19,14 @@ import java.util.Map;
  * @author Kazuyuki.T
  */
 public class EditCsvFile {
+    // mode30用　result統合
+    // 所持数ごとにカウント
+    // アイテム所持数，データ数，正例数，負例数，ゲーム数，勝利数，敗北数
+    // リストにより管理，新しい所持数ごとに追加
+    Map<Integer, GameLog> totalResult; // アイテム数，対応成績
+    
     public EditCsvFile(){
-        
+        totalResult = new HashMap<Integer, GameLog>();
     }
     
     public void edit(String csvFile, int mode, int BATTLELOG_LIMIT_N){
@@ -50,10 +58,17 @@ public class EditCsvFile {
             double[] ele; // コンマ分割数字列，配列格納
             boolean addLine; // 追記するか否か
             
+            // modeが40番台のとき，indexはアイテムワンホットに
+            if(mode / 10 == 4) index = "hp,lv,sp,pt_4over,pt_3,pt_2,pt_1,pt_0,ar_12over,ar_9,ar_6,ar_3,ar_0,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
+            if(mode == 50) index = "hp_100over,hp_80,hp_60,hp_40,hp_20,hp_0,lv,sp,pt,ar_12over,ar_9,ar_6,ar_3,ar_0,st,unknown area,stair,game clear";
+            if(mode == 51) index = "hp_100over,hp_80,hp_60,hp_40,hp_20,hp_0,lv,sp,pt_4over,pt_3,pt_2,pt_1,pt_0,ar_12over,ar_9,ar_6,ar_3,ar_0,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
+            if(mode == 52) index = "hp_100over,hp_90,hp_80,hp_70,hp_60,hp_50,hp_40,hp_30,hp_20,hp_10,hp_0,lv,sp,pt,ar_12over,ar_9,ar_6,ar_3,ar_0,st,unknown area,stair,game clear";
+            if(mode == 53) index = "hp_100over,hp_90,hp_80,hp_70,hp_60,hp_50,hp_40,hp_30,hp_20,hp_10,hp_0,lv,sp,pt_4over,pt_3,pt_2,pt_1,pt_0,ar_12over,ar_9,ar_6,ar_3,ar_0,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
+            
             int gameCountBefore = -1; // 前回記録したゲームカウント
             int btCount = 0; // 同じゲームカウントでの戦闘回数記録，2回以上で次のゲームカウントへ
             
-            Map<Integer, GameLog> map = new HashMap<Integer, GameLog>(); 
+            Map<Integer, GameLog> result = new HashMap<Integer, GameLog>(); // 各アイテム数ごとにデータ数等集計
             
             for(int row = 0; line != null; row++){
                 lineSp = line.split(",", 0);
@@ -108,15 +123,16 @@ public class EditCsvFile {
                     int itemnun = (int)ele[8];
                     GameLog gamelog;
                     // mapに該当アイテム数が追加されていないとき
-                    if(map.containsKey(itemnun) == false){
-                        map.put(itemnun, new GameLog());
+                    if(result.containsKey(itemnun) == false){
+                        result.put(itemnun, new GameLog());
                     }
-                    gamelog = map.get(itemnun);
+                    gamelog = result.get(itemnun);
                     
                     
                     gamelog.dataCounter(); // データ数をカウント
                     int gametf = (int)ele[21]; // 該当ゲームの勝敗の記録
-                    if(gametf == 1) gamelog.posCounter(); // 正例数をカウント
+                    if(gametf == 1)    gamelog.posCounter(); // 正例数をカウント
+                    if(gametf == -1)   gamelog.negCounter(); // 負例数をカウント
                     
                     
                     int gc = (int)ele[0]; // ゲームカウント
@@ -124,16 +140,335 @@ public class EditCsvFile {
                     if(gameCountBefore != gc){
                         gamelog.gameCounter();
                         if(gametf == 1) gamelog.winCounter();
+                        if(gametf == -1)gamelog.loseCounter();
                     }
                     
-                    map.put(itemnun, gamelog); // 上書き
+                    result.put(itemnun, gamelog); // 上書き
                     
                     gameCountBefore = gc;
                     
                     addLine = false;
                 }
+                else if(mode == 21){ // csv分割なし，回復薬の個数ごとにデータ数，正例数，ゲーム数，勝利数をカウント
+                    int itemnun = (int)ele[7];
+                    GameLog gamelog;
+                    // mapに該当アイテム数が追加されていないとき
+                    if(result.containsKey(itemnun) == false){
+                        result.put(itemnun, new GameLog());
+                    }
+                    gamelog = result.get(itemnun);
+                    
+                    
+                    gamelog.dataCounter(); // データ数をカウント
+                    int gametf = (int)ele[21]; // 該当ゲームの勝敗の記録
+                    if(gametf == 1)    gamelog.posCounter(); // 正例数をカウント
+                    if(gametf == -1)   gamelog.negCounter(); // 負例数をカウント
+                    
+                    
+                    int gc = (int)ele[0]; // ゲームカウント
+                    // 前の記録ゲーム数と異なるとき，ゲーム数及び勝利数をカウント
+                    if(gameCountBefore != gc){
+                        gamelog.gameCounter();
+                        if(gametf == 1) gamelog.winCounter();
+                        if(gametf == -1)gamelog.loseCounter();
+                    }
+                    
+                    result.put(itemnun, gamelog); // 上書き
+                    
+                    gameCountBefore = gc;
+                    
+                    addLine = false;
+                }
+                else if(mode == 22){ // csv分割なし，杖の個数ごとにデータ数，正例数，ゲーム数，勝利数をカウント
+                    int itemnun = (int)ele[9];
+                    GameLog gamelog;
+                    // mapに該当アイテム数が追加されていないとき
+                    if(result.containsKey(itemnun) == false){
+                        result.put(itemnun, new GameLog());
+                    }
+                    gamelog = result.get(itemnun);
+                    
+                    
+                    gamelog.dataCounter(); // データ数をカウント
+                    int gametf = (int)ele[21]; // 該当ゲームの勝敗の記録
+                    if(gametf == 1)    gamelog.posCounter(); // 正例数をカウント
+                    if(gametf == -1)   gamelog.negCounter(); // 負例数をカウント
+                    
+                    
+                    int gc = (int)ele[0]; // ゲームカウント
+                    // 前の記録ゲーム数と異なるとき，ゲーム数及び勝利数をカウント
+                    if(gameCountBefore != gc){
+                        gamelog.gameCounter();
+                        if(gametf == 1) gamelog.winCounter();
+                        if(gametf == -1)gamelog.loseCounter();
+                    }
+                    
+                    result.put(itemnun, gamelog); // 上書き
+                    
+                    gameCountBefore = gc;
+                    
+                    addLine = false;
+                }
+                else if(mode == 30){ // resultのデータ数等集計
+                    int itemnun = (int)ele[0];
+                    GameLog gamelog;
+                    // mapに該当アイテム数が追加されていないとき
+                    if(totalResult.containsKey(itemnun) == false){
+                        totalResult.put(itemnun, new GameLog());
+                    }
+                    gamelog = totalResult.get(itemnun);
+                    
+                    //System.out.println(itemnun);
+                    
+                    gamelog.adddataCount((int)ele[1]);
+                    gamelog.addposCount((int)ele[2]);
+                    gamelog.addnegCount((int)ele[3]);
+                    gamelog.addgameCount((int)ele[4]);
+                    gamelog.addwinCount((int)ele[5]);
+                    gamelog.addloseCount((int)ele[6]);
+                    
+                    totalResult.put(itemnun, gamelog); // 上書き
+                    
+                    addLine = false;
+                }
+                else if(mode == 40){
+                    double[] eleplus = new double[21];
+                    
+                    // eleからeleplus作成
+                    // i : 変換前
+                    // j : 変換後
+                    for(int i=0, j=0; i<9; i++, j++){
+                        if(i == 3){
+                            // 所持数 -> ワンホット表現
+                            int[] tmpOnehotPt = getOnehotArrayPtorSt((int)ele[i]);
+                            for(int k=0; k<tmpOnehotPt.length; k++, j++){
+                                eleplus[j] = tmpOnehotPt[k];
+                            }
+                        }
+                        else if(i == 4){
+                            double[] tmpOnehotAr = getOnehotArrayAr((int)ele[i]);
+                            for(int k=0; k<tmpOnehotAr.length; k++, j++){
+                                eleplus[j] = tmpOnehotAr[k];
+                            }
+                        }
+                        else if(i == 5){
+                            int[] tmpOnehotSt = getOnehotArrayPtorSt((int)ele[i]);
+                            for(int k=0; k<tmpOnehotSt.length; k++, j++){
+                                eleplus[j] = tmpOnehotSt[k];
+                            }
+                        }
+                        else{
+                            eleplus[j] = ele[i];
+                        }
+                    }
+                    
+                    // eleplusからnewline作成
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    
+                    // lineの上書き
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_allItemOnehot.csv"));
+                }
+                else if(mode == 41){
+                    double[] eleplus = new double[21];
+                    
+                    for(int i=0, j=0; i<13; i++){
+                        if(i == 8){
+                            double[] tmpOnehotAr = getOnehotArrayAr((int)ele[i]);
+                            for(int k=0; k<tmpOnehotAr.length; k++, j++){
+                                eleplus[j] = tmpOnehotAr[k];
+                            }
+                        }
+                        else if(i == 9){
+                            int[] tmpOnehotSt = getOnehotArrayPtorSt((int)ele[i]);
+                            for(int k=0; k<tmpOnehotSt.length; k++, j++){
+                                eleplus[j] = tmpOnehotSt[k];
+                            }
+                        }
+                        else{
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_allItemOnehot.csv"));
+                }
+                else if(mode == 42){
+                    double[] eleplus = new double[21];
+                    
+                    for(int i=0, j=0; i<13; i++){
+                        if(i == 3){
+                            // 所持数 -> ワンホット表現
+                            int[] tmpOnehotPt = getOnehotArrayPtorSt((int)ele[i]);
+                            for(int k=0; k<tmpOnehotPt.length; k++, j++){
+                                eleplus[j] = tmpOnehotPt[k];
+                            }
+                        }
+                        else if(i == 9){
+                            int[] tmpOnehotSt = getOnehotArrayPtorSt((int)ele[i]);
+                            for(int k=0; k<tmpOnehotSt.length; k++, j++){
+                                eleplus[j] = tmpOnehotSt[k];
+                            }
+                        }
+                        else{
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_allItemOnehot.csv"));
+                }
+                else if(mode == 43){
+                    double[] eleplus = new double[21];
+                    
+                    for(int i=0, j=0; i<13; i++){
+                        if(i == 3){
+                            // 所持数 -> ワンホット表現
+                            int[] tmpOnehotPt = getOnehotArrayPtorSt((int)ele[i]);
+                            for(int k=0; k<tmpOnehotPt.length; k++, j++){
+                                eleplus[j] = tmpOnehotPt[k];
+                            }
+                        }
+                        else if(i == 4){
+                            double[] tmpOnehotAr = getOnehotArrayAr((int)ele[i]);
+                            for(int k=0; k<tmpOnehotAr.length; k++, j++){
+                                eleplus[j] = tmpOnehotAr[k];
+                            }
+                        }
+                        else{
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_allItemOnehot.csv"));
+                }
+                else if(mode == 49){
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_allItemOnehot.csv"));
+                }
+                else if(mode == 50){
+                    double[] eleplus = new double[18];
+                    
+                    for(int i=0, j=0; i<13; i++){
+                        if(i == 0){
+                            // hp -> ワンホット表現
+                            double[] tmpOnehotHp = getOnehotArrayHpDiv05((int)ele[0]);
+                            for(int k=0; k<tmpOnehotHp.length; k++, j++){
+                                eleplus[j] = tmpOnehotHp[k];
+                            }
+                        }
+                        else{
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_hpOnehot.csv"));
+                }
+                else if(mode == 51){
+                    double[] eleplus = new double[26];
+                    
+                    for(int i=0, j=0; i<21; i++){
+                        if(i == 0){
+                            // hp -> ワンホット表現
+                            double[] tmpOnehotHp = getOnehotArrayHpDiv05((int)ele[0]);
+                            for(int k=0; k<tmpOnehotHp.length; k++, j++){
+                                eleplus[j] = tmpOnehotHp[k];
+                            }
+                        }
+                        else{
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_hpOnehot.csv"));
+                }
+                else if(mode == 52){
+                    double[] eleplus = new double[23];
+                    
+                    for(int i=0, j=0; i<13; i++){
+                        if(i == 0){
+                            // hp -> ワンホット表現
+                            double[] tmpOnehotHp = getOnehotArrayHpDiv10((int)ele[0]);
+                            for(int k=0; k<tmpOnehotHp.length; k++, j++){
+                                eleplus[j] = tmpOnehotHp[k];
+                            }
+                        }
+                        else{
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_hpOnehot.csv"));
+                }
+                else if(mode == 60){
+                    int hpval = (ele[0] > 100) ? 100 : (int)(ele[0] / 10.0 + 0.5) * 10;
+                    //System.out.println(ele[0] + "->" + hpval);
+                    GameLog gamelog;
+                    // mapに該当アイテム数が追加されていないとき
+                    if(result.containsKey(hpval) == false){
+                        result.put(hpval, new GameLog());
+                    }
+                    gamelog = result.get(hpval);
+                    
+                    gamelog.dataCounter(); // データ数をカウント
+                    int gametf = (int)ele[20]; // 該当ゲームの勝敗の記録
+                    if(gametf == 1)    gamelog.posCounter(); // 正例数をカウント
+                    else if(gametf == -1)   gamelog.negCounter(); // 負例数をカウント
+                    else System.out.println("error!");
+                    
+                    result.put(hpval, gamelog); // 上書き
+                    
+                    addLine = false;
+                }
                 else{
                     addLine = false;
+                    System.out.println("Mode [" + mode + "] is not found.");
+                    System.exit(0);
                 }
                 
                 if(addLine == true){
@@ -146,15 +481,37 @@ public class EditCsvFile {
                 if(row % 1000 == 0 || line == null) System.out.println("row : " + row);
             }
             
-            if(mode == 20){ // ゲーム数・勝率等の出力
+            if(mode == 20 || mode == 21 || mode == 22 || mode == 60){ // ゲーム数・勝率等の出力
                 outputFilename = new File(new String(dir + "/" + dir + "_result.csv"));
 
+                // ファイルが存在しないとき→ラベル付け，存在する→追記
+                String resultIndex = "num,datanum,posnum,negnum,gamenum,winnum,losenum";
+                StringBuilder stb_main = new StringBuilder();
+                
+                for(Map.Entry<Integer, GameLog> entry : result.entrySet()){
+                    GameLog gamelog = entry.getValue();
+                    stb_main.append(entry.getKey());
+                    stb_main.append("," + gamelog.getdataCount());
+                    stb_main.append("," + gamelog.getposCount());
+                    stb_main.append("," + gamelog.getnegCount());
+                    stb_main.append("," + gamelog.getgameCount());
+                    stb_main.append("," + gamelog.getwinCount());
+                    stb_main.append("," + gamelog.getloseCount());
+                    stb_main.append(System.getProperty("line.separator"));
+                }
+                System.out.println(new String(stb_main));
+                
+                if(outputFilename.exists() == false) Logger.OutputFileLog(outputFilename.toString(), new String(resultIndex + System.getProperty("line.separator")), true);
+                Logger.OutputFileLog(outputFilename.toString(), new String(stb_main), true);
+            }
+            
+            if(mode == 30){
                 // ファイルが存在しないとき→ラベル付け，存在する→追記
                 String resultIndex = "ar,datanum,posnum,negnum,gamenum,winnum,losenum";
                 StringBuilder stb_main = new StringBuilder();
                 
-                for(int n = 0; map.containsKey(n) == true; n++){
-                    GameLog gamelog = map.get(n);
+                for(int n = 0; totalResult.containsKey(n) == true; n++){
+                    GameLog gamelog = totalResult.get(n);
                     stb_main.append(n);
                     stb_main.append("," + gamelog.getdataCount());
                     stb_main.append("," + gamelog.getposCount());
@@ -165,8 +522,7 @@ public class EditCsvFile {
                     stb_main.append(System.getProperty("line.separator"));
                 }
                 
-                if(outputFilename.exists() == false) Logger.OutputFileLog(outputFilename.toString(), new String(resultIndex + System.getProperty("line.separator")), true);
-                Logger.OutputFileLog(outputFilename.toString(), new String(stb_main + System.getProperty("line.separator")), true);
+                System.out.println(stb_main);
             }
             
             br.close();
@@ -176,17 +532,137 @@ public class EditCsvFile {
         }
     }
     
+    public double[] getOnehotArrayAr(int arNum){
+        double[] onehot = {0.0, 0.0, 0.0, 0.0, 0.0};
+        
+        if(arNum >= 12) onehot[0] = 1.0;
+        else if(11 >= arNum && arNum >= 9){
+            onehot[0] = (arNum - 9) / 3.0;
+            onehot[1] = (12 - arNum) / 3.0;
+        }
+        else if(8 >= arNum && arNum >= 6){
+            onehot[1] = (arNum - 6) / 3.0;
+            onehot[2] = (9 - arNum) / 3.0;
+        }
+        else if(5 >= arNum && arNum >= 3){
+            onehot[2] = (arNum - 3) / 3.0;
+            onehot[3] = (6 - arNum) / 3.0;
+        }
+        else if(2 >= arNum){
+            onehot[3] = arNum / 3.0;
+            onehot[4] = (3 - arNum) / 3.0;
+        }
+        
+        return onehot;
+    }
+    
+    public int[] getOnehotArrayPtorSt(int psNum){
+        int[] onehot = {0, 0, 0, 0, 0};
+        
+        if(psNum >= 4) onehot[0] = 1;
+        else if(psNum == 3) onehot[1] = 1;
+        else if(psNum == 2) onehot[2] = 1;
+        else if(psNum == 1) onehot[3] = 1;
+        else if(psNum == 0) onehot[4] = 1;
+        
+        return onehot;
+    }
+    
+    public double[] getOnehotArrayHpDiv05(int hp){
+        double[] onehot = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        
+        if(hp >= 100){
+            onehot[0] = 1;
+        }
+        else if(100 > hp && hp >= 80){
+            onehot[0] = (hp - 80) / 20.0;
+            onehot[1] = (100 - hp) / 20.0;
+        }
+        else if(80 > hp && hp >= 60){
+            onehot[1] = (hp - 60) / 20.0;
+            onehot[2] = (80 - hp) / 20.0;
+        }
+        else if(60 > hp && hp >= 40){
+            onehot[2] = (hp - 40) / 20.0;
+            onehot[3] = (60 - hp) / 20.0;
+        }
+        else if(40 > hp && hp >= 20){
+            onehot[3] = (hp - 20) / 20.0;
+            onehot[4] = (40 - hp) / 20.0;
+        }
+        else if(20 > hp){
+            onehot[4] = hp / 20.0;
+            onehot[5] = (20 - hp) / 20.0;
+        }
+        
+        return onehot;
+    }
+    
+    public double[] getOnehotArrayHpDiv10(int hp){
+        double[] onehot = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        
+        if(hp >= 100){
+            onehot[0] = 1;
+        }
+        else if(100 > hp && hp >= 90){
+            onehot[0] = (hp - 90) / 10.0;
+            onehot[1] = (100 - hp) / 10.0;
+        }
+        else if(90 > hp && hp >= 80){
+            onehot[1] = (hp - 80) / 10.0;
+            onehot[2] = (90 - hp) / 10.0;
+        }
+        else if(80 > hp && hp >= 70){
+            onehot[2] = (hp - 70) / 10.0;
+            onehot[3] = (80 - hp) / 10.0;
+        }
+        else if(70 > hp && hp >= 60){
+            onehot[3] = (hp - 60) / 10.0;
+            onehot[4] = (70 - hp) / 10.0;
+        }
+        else if(60 > hp && hp >= 50){
+            onehot[4] = (hp - 50) / 10.0;
+            onehot[5] = (60 - hp) / 10.0;
+        }
+        else if(50 > hp && hp >= 40){
+            onehot[5] = (hp - 40) / 10.0;
+            onehot[6] = (50 - hp) / 10.0;
+        }
+        else if(40 > hp && hp >= 30){
+            onehot[6] = (hp - 30) / 10.0;
+            onehot[7] = (40 - hp) / 10.0;
+        }
+        else if(30 > hp && hp >= 20){
+            onehot[7] = (hp - 20) / 10.0;
+            onehot[8] = (30 - hp) / 10.0;
+        }
+        else if(20 > hp && hp >= 10){
+            onehot[8] = (hp - 10) / 10.0;
+            onehot[9] = (20 - hp) / 10.0;
+        }
+        else if(10 > hp){
+            onehot[9] = hp / 10.0;
+            onehot[10] = (10 - hp) / 10.0;
+        }
+        
+        return onehot;
+    }
+    
     public class GameLog{
         private int dataCount; // データ数
         private int posCount; // 正例数
+        private int negCount; // 負例数
         private int gameCount; // ゲーム回数
         private int winCount; // 勝利数
+        private int loseCount; // 敗北数
         
         public GameLog(){
             dataCount = 0;
             posCount = 0;
+            negCount = 0;
             gameCount = 0;
             winCount = 0;
+            loseCount = 0;
         }
         
         public void dataCounter(){
@@ -195,11 +671,17 @@ public class EditCsvFile {
         public void posCounter(){
             posCount++;
         }
+        public void negCounter(){
+            negCount++;
+        }
         public void gameCounter(){
             gameCount++;
         }
         public void winCounter(){
             winCount++;
+        }
+        public void loseCounter(){
+            loseCount++;
         }
         
         public int getdataCount(){
@@ -209,7 +691,7 @@ public class EditCsvFile {
             return posCount;
         }
         public int getnegCount(){
-            return dataCount - posCount;
+            return negCount;
         }
         public int getgameCount(){
             return gameCount;
@@ -218,7 +700,26 @@ public class EditCsvFile {
             return winCount;
         }
         public int getloseCount(){
-            return gameCount - winCount;
+            return loseCount;
+        }
+        
+        public void adddataCount(int dataCount){
+            this.dataCount += dataCount;
+        }
+        public void addposCount(int posCount){
+            this.posCount += posCount;
+        }
+        public void addnegCount(int negCount){
+            this.negCount += negCount;
+        }
+        public void addgameCount(int gameCount){
+            this.gameCount += gameCount;
+        }
+        public void addwinCount(int winCount){
+            this.winCount += winCount;
+        }
+        public void addloseCount(int loseCount){
+            this.loseCount += loseCount;
         }
     }
 }
