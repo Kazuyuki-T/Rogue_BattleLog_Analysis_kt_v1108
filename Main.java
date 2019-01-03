@@ -43,7 +43,8 @@ public class Main {
         // mode44 : csv分割なし, normal(9col) -> hp onehot(10刻み，10分割)(19col)
         // mode45 : csv分割なし, normal(9col) -> hp onehot(10刻み，10分割)(19col), except hp==0
         // mode46 : csv分割なし, normal(9col) -> hp onehot(30刻み+1，6分割[0,1,30,60,90,120])(14col)
-        // mode47 : csv分割なし, normal -> hp(div4p1) + all item onehot
+        // mode47 : csv分割なし, normal(9col) -> hp(div4p1) + all item onehot (26col)
+        // mode48 : csv分割なし, hp(div4p1) + all item onehot (26col) -> + sp([0,20,40,60,80,100]) (31col)
         // mode49 : csv分割なし, ラベル整数化
         // mode50 : csv分割なし, only ar onehot(13col) -> + hp onehot(20刻み，5分割)(18col)
         // mode51 : csv分割なし, all item onehot() -> + hp onehot(20刻み，5分割)()
@@ -57,7 +58,7 @@ public class Main {
         // mode62 : csv分割なし, hp onehot(div10,19col) -> datanum,posrate count
         // mode63 : csv分割なし, hp onehot(div4p1,14col) -> datanum,posrate count
         
-        int mode = 47;
+        int mode = 48;
         int btLimit = -1; // mode=10で必要，記録する同フロア戦闘数制限
         
         EditCsvFile ecf = new EditCsvFile();

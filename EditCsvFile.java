@@ -469,37 +469,18 @@ public class EditCsvFile {
                     outputFilename = new File(new String(dir + "/" + dir + "_Mode" + mode + ".csv"));
                 }
                 
-                // mode47 : csv分割なし, normal -> hp(div4p1) + all item onehot
-                else if(mode == 47){
-                    double[] eleplus = new double[26];
+                // mode48 : csv分割なし, hp(div4p1) + all item onehot (26col) -> + sp([0,20,40,60,80,100]) (31col)
+                else if(mode == 48){
+                    double[] eleplus = new double[31];
                     
                     // eleからeleplus作成
                     // i : 変換前
                     // j : 変換後
-                    for(int i=0, j=0; i<9; i++){
-                        if(i == 0){
-                            double[] tmpOnehotHp = getOnehotArrayHpDiv04p1((int)ele[i]);
-                            for(int k=0; k<tmpOnehotHp.length; k++, j++){
-                                eleplus[j] = tmpOnehotHp[k];
-                            }
-                        }
-                        else if(i == 3){
-                            // 所持数 -> ワンホット表現
-                            int[] tmpOnehotPt = getOnehotArrayPtorSt((int)ele[i]);
-                            for(int k=0; k<tmpOnehotPt.length; k++, j++){
-                                eleplus[j] = tmpOnehotPt[k];
-                            }
-                        }
-                        else if(i == 4){
-                            double[] tmpOnehotAr = getOnehotArrayAr((int)ele[i]);
-                            for(int k=0; k<tmpOnehotAr.length; k++, j++){
-                                eleplus[j] = tmpOnehotAr[k];
-                            }
-                        }
-                        else if(i == 5){
-                            int[] tmpOnehotSt = getOnehotArrayPtorSt((int)ele[i]);
-                            for(int k=0; k<tmpOnehotSt.length; k++, j++){
-                                eleplus[j] = tmpOnehotSt[k];
+                    for(int i=0, j=0; i<26; i++){
+                        if(i == 7){
+                            double[] tmpOnehotSp = getOnehotArrayHpSpDiv05((int)ele[i]);
+                            for(int k=0; k<tmpOnehotSp.length; k++, j++){
+                                eleplus[j] = tmpOnehotSp[k];
                             }
                         }
                         else{
@@ -533,7 +514,7 @@ public class EditCsvFile {
                     for(int i=0, j=0; i<13; i++){
                         if(i == 0){
                             // hp -> ワンホット表現
-                            double[] tmpOnehotHp = getOnehotArrayHpDiv05((int)ele[0]);
+                            double[] tmpOnehotHp = getOnehotArrayHpSpDiv05((int)ele[0]);
                             for(int k=0; k<tmpOnehotHp.length; k++, j++){
                                 eleplus[j] = tmpOnehotHp[k];
                             }
@@ -558,7 +539,7 @@ public class EditCsvFile {
                     for(int i=0, j=0; i<21; i++){
                         if(i == 0){
                             // hp -> ワンホット表現
-                            double[] tmpOnehotHp = getOnehotArrayHpDiv05((int)ele[0]);
+                            double[] tmpOnehotHp = getOnehotArrayHpSpDiv05((int)ele[0]);
                             for(int k=0; k<tmpOnehotHp.length; k++, j++){
                                 eleplus[j] = tmpOnehotHp[k];
                             }
@@ -892,7 +873,7 @@ public class EditCsvFile {
         return onehot;
     }
     
-    public double[] getOnehotArrayHpDiv05(int hp){
+    public double[] getOnehotArrayHpSpDiv05(int hp){
         // 0,20,40,60,80,100
         double[] onehot = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         
