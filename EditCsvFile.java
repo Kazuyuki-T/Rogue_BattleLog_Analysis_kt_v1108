@@ -84,7 +84,7 @@ public class EditCsvFile {
             
             for(int row = 0; line != null; row++){
                 lineSp = line.split(",", 0);
-                ele = new double[22]; // gn,rn,dn,flr,hp,lv,sp,pt,ar,st,getflritem,getflrfd,getflrpt,getflrar,getflrst,getallitem,unk,st,br,cfc,nfc,gc
+                ele = new double[40]; // gn,rn,dn,flr,hp,lv,sp,pt,ar,st,getflritem,getflrfd,getflrpt,getflrar,getflrst,getallitem,unk,st,br,cfc,nfc,gc
                 addLine = true;
                 
                 for(int i = 0; i < lineSp.length ; i++){
