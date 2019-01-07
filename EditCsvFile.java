@@ -58,6 +58,7 @@ public class EditCsvFile {
             double[] ele; // コンマ分割数字列，配列格納
             boolean addLine; // 追記するか否か
             
+            
             // modeが40番台のとき，indexはアイテムワンホットに
             if(mode == 41 || mode == 42 || mode == 43) index = "hp,lv,sp,pt_4over,pt_3,pt_2,pt_1,pt_0,ar_12over,ar_9,ar_6,ar_3,ar_0,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
             if(mode == 44 || mode == 45) index = "hp_100over,hp_90,hp_80,hp_70,hp_60,hp_50,hp_40,hp_30,hp_20,hp_10,hp_0,lv,sp,pt,ar,st,unknown area,stair,game clear";
@@ -70,8 +71,12 @@ public class EditCsvFile {
             if(mode == 54) index = "hp_100over,hp_90,hp_80,hp_70,hp_60,hp_50,hp_40,hp_30,hp_20,hp_10,hp_0,lv,sp,pt,ar_12over,ar_9,ar_6,ar_3,ar_0,st,unknown area,stair,game clear";
             if(mode == 55) index = "hp_120over,hp_90,hp_60,hp_30,hp_1,hp_0,lv,sp,pt,ar_12over,ar_9,ar_6,ar_3,ar_0,st,unknown area,stair,game clear";
             if(mode == 56) index = "hp_120over,hp_90,hp_60,hp_30,hp_1,hp_0,lv,sp,pt_4over,pt_3,pt_2,pt_1,pt_0,ar_12over,ar_9,ar_6,ar_3,ar_0,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
-            
-            
+            if(mode == 70) index = "hp_120over,hp_90,hp_60,hp_30,hp_1,hp_0,lv,sp_100over,sp_80,sp_60,sp_40,sp_20,sp_0,pt_4over,pt_3,pt_2,pt_1,pt_0,ar_12over,ar_9,ar_6,ar_3,ar_0,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
+            if(mode == 71) index = "hp_120over,hp_90,hp_60,hp_30,hp_1,hp_0,lv,sp_100over,sp_75,sp_50,sp_25,sp_0,pt_4over,pt_3,pt_2,pt_1,pt_0,ar_12over,ar_9,ar_6,ar_3,ar_0,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
+            if(mode == 72) index = "hp_120over,hp_90,hp_60,hp_30,hp_1,hp_0,lv,sp_120over,sp_90,sp_60,sp_30,sp_0,pt_4over,pt_3,pt_2,pt_1,pt_0,ar_12over,ar_9,ar_6,ar_3,ar_0,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
+            if(mode == 73) index = "hp_120over,hp_90,hp_60,hp_30,hp_1,hp_0,lv,sp_120over,sp_90,sp_60,sp_30,sp_1,sp_0,pt_4over,pt_3,pt_2,pt_1,pt_0,ar_12over,ar_9,ar_6,ar_3,ar_0,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
+
+                        
             int gameCountBefore = -1; // 前回記録したゲームカウント
             int btCount = 0; // 同じゲームカウントでの戦闘回数記録，2回以上で次のゲームカウントへ
             
@@ -449,7 +454,7 @@ public class EditCsvFile {
                     for(int i=0, j=0; i<9; i++){
                         if(i == 0){
                             // hp -> ワンホット表現
-                            double[] tmpOnehotHp = getOnehotArrayHpDiv04p1((int)ele[0]);
+                            double[] tmpOnehotHp = getOnehotArrayHpSpDiv04p1((int)ele[0]);
                             for(int k=0; k<tmpOnehotHp.length; k++, j++){
                                 eleplus[j] = tmpOnehotHp[k];
                             }
@@ -465,39 +470,6 @@ public class EditCsvFile {
                         else                        stb_line_HpOnehot.append((int)eleplus[j]);
                     }
                     line = new String(stb_line_HpOnehot);
-                    
-                    outputFilename = new File(new String(dir + "/" + dir + "_Mode" + mode + ".csv"));
-                }
-                
-                // mode48 : csv分割なし, hp(div4p1) + all item onehot (26col) -> + sp([0,20,40,60,80,100]) (31col)
-                else if(mode == 48){
-                    double[] eleplus = new double[31];
-                    
-                    // eleからeleplus作成
-                    // i : 変換前
-                    // j : 変換後
-                    for(int i=0, j=0; i<26; i++){
-                        if(i == 7){
-                            double[] tmpOnehotSp = getOnehotArrayHpSpDiv05((int)ele[i]);
-                            for(int k=0; k<tmpOnehotSp.length; k++, j++){
-                                eleplus[j] = tmpOnehotSp[k];
-                            }
-                        }
-                        else{
-                            //System.out.println("i:" + i + ", j:" + j);
-                            eleplus[j++] = ele[i];
-                        }
-                    }
-                    
-                    // eleplusからnewline作成
-                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
-                    for(int j = 0; j < eleplus.length; j++){
-                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
-                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
-                    }
-                    
-                    // lineの上書き
-                    line = new String(stb_line_ItemOnehot);
                     
                     outputFilename = new File(new String(dir + "/" + dir + "_Mode" + mode + ".csv"));
                 }
@@ -620,7 +592,7 @@ public class EditCsvFile {
                     for(int i=0, j=0; i<13; i++){
                         if(i == 0){
                             // hp -> ワンホット表現
-                            double[] tmpOnehotHp = getOnehotArrayHpDiv04p1((int)ele[0]);
+                            double[] tmpOnehotHp = getOnehotArrayHpSpDiv04p1((int)ele[0]);
                             for(int k=0; k<tmpOnehotHp.length; k++, j++){
                                 eleplus[j] = tmpOnehotHp[k];
                             }
@@ -645,7 +617,7 @@ public class EditCsvFile {
                     for(int i=0, j=0; i<21; i++){
                         if(i == 0){
                             // hp -> ワンホット表現
-                            double[] tmpOnehotHp = getOnehotArrayHpDiv04p1((int)ele[0]);
+                            double[] tmpOnehotHp = getOnehotArrayHpSpDiv04p1((int)ele[0]);
                             for(int k=0; k<tmpOnehotHp.length; k++, j++){
                                 eleplus[j] = tmpOnehotHp[k];
                             }
@@ -740,6 +712,139 @@ public class EditCsvFile {
                     
                     addLine = false;
                 }
+                
+                // mode70 : csv分割なし, hp(div4p1) + all item onehot (26col) -> + sp([0,20,40,60,80,100]) (31col)
+                else if(mode == 70){
+                    double[] eleplus = new double[31];
+                    
+                    // eleからeleplus作成
+                    // i : 変換前
+                    // j : 変換後
+                    for(int i=0, j=0; i<26; i++){
+                        if(i == 7){
+                            double[] tmpOnehotSp = getOnehotArrayHpSpDiv05((int)ele[i]);
+                            for(int k=0; k<tmpOnehotSp.length; k++, j++){
+                                eleplus[j] = tmpOnehotSp[k];
+                            }
+                        }
+                        else{
+                            //System.out.println("i:" + i + ", j:" + j);
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    // eleplusからnewline作成
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    
+                    // lineの上書き
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_Mode" + mode + ".csv"));
+                }
+                
+                // mode71 : csv分割なし, hp(div4p1) + all item onehot (26col) -> + sp([0,25,50,75,100]) (30col)
+                else if(mode == 71){
+                    double[] eleplus = new double[30];
+                    
+                    // eleからeleplus作成
+                    // i : 変換前
+                    // j : 変換後
+                    for(int i=0, j=0; i<26; i++){
+                        if(i == 7){
+                            double[] tmpOnehotSp = getOnehotArrayHpSpDiv04((int)ele[i]);
+                            for(int k=0; k<tmpOnehotSp.length; k++, j++){
+                                eleplus[j] = tmpOnehotSp[k];
+                            }
+                        }
+                        else{
+                            //System.out.println("i:" + i + ", j:" + j);
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    // eleplusからnewline作成
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    
+                    // lineの上書き
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_Mode" + mode + ".csv"));
+                }
+                
+                // mode72 : csv分割なし, hp(div4p1) + all item onehot (26col) -> + sp([0,30,60,90,120]) (30col)
+                else if(mode == 72){
+                    double[] eleplus = new double[30];
+                    
+                    // eleからeleplus作成
+                    // i : 変換前
+                    // j : 変換後
+                    for(int i=0, j=0; i<26; i++){
+                        if(i == 7){
+                            double[] tmpOnehotSp = getOnehotArrayHpSpDiv04p0((int)ele[i]);
+                            for(int k=0; k<tmpOnehotSp.length; k++, j++){
+                                eleplus[j] = tmpOnehotSp[k];
+                            }
+                        }
+                        else{
+                            //System.out.println("i:" + i + ", j:" + j);
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    // eleplusからnewline作成
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    
+                    // lineの上書き
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_Mode" + mode + ".csv"));
+                }
+                
+                // mode73 : csv分割なし, hp(div4p1) + all item onehot (26col) -> + sp([0,1,30,60,90,120]) (31col)
+                else if(mode == 73){
+                    double[] eleplus = new double[31];
+                    
+                    // eleからeleplus作成
+                    // i : 変換前
+                    // j : 変換後
+                    for(int i=0, j=0; i<26; i++){
+                        if(i == 7){
+                            double[] tmpOnehotSp = getOnehotArrayHpSpDiv04p1((int)ele[i]);
+                            for(int k=0; k<tmpOnehotSp.length; k++, j++){
+                                eleplus[j] = tmpOnehotSp[k];
+                            }
+                        }
+                        else{
+                            //System.out.println("i:" + i + ", j:" + j);
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    // eleplusからnewline作成
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    
+                    // lineの上書き
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_Mode" + mode + ".csv"));
+                }
+                
                 else{
                     addLine = false;
                     System.out.println("Mode [" + mode + "] is not found.");
@@ -843,30 +948,84 @@ public class EditCsvFile {
         return onehot;
     }
     
-    public double[] getOnehotArrayHpDiv04p1(int hp){
+    public double[] getOnehotArrayHpSpDiv04(int np){
+        // 0,25,50,75,100
+        double[] onehot = {0.0, 0.0, 0.0, 0.0, 0.0};
+        
+        if(np >= 100){
+            onehot[0] = 1;
+        }
+        else if(100 > np && np >= 75){
+            onehot[0] = (np - 75) / 25.0;
+            onehot[1] = (100 - np) / 25.0;
+        }
+        else if(75 > np && np >= 50){
+            onehot[1] = (np - 50) / 25.0;
+            onehot[2] = (75 - np) / 25.0;
+        }
+        else if(50 > np && np >= 25){
+            onehot[2] = (np - 25) / 25.0;
+            onehot[3] = (50 - np) / 25.0;
+        }
+        else if(25 > np){
+            onehot[3] = (np - 0) / 25.0;
+            onehot[4] = (25 - np) / 25.0;
+        }
+        
+        return onehot;
+    }
+    
+    public double[] getOnehotArrayHpSpDiv04p0(int np){
+        // 0,30,60,90,120
+        double[] onehot = {0.0, 0.0, 0.0, 0.0, 0.0};
+        
+        if(np >= 120){
+            onehot[0] = 1;
+        }
+        else if(120 > np && np >= 90){
+            onehot[0] = (np - 90) / 30.0;
+            onehot[1] = (120 - np) / 30.0;
+        }
+        else if(90 > np && np >= 60){
+            onehot[1] = (np - 60) / 30.0;
+            onehot[2] = (90 - np) / 30.0;
+        }
+        else if(60 > np && np >= 30){
+            onehot[2] = (np - 30) / 30.0;
+            onehot[3] = (60 - np) / 30.0;
+        }
+        else if(30 > np){
+            onehot[3] = (np - 0) / 30.0;
+            onehot[4] = (30 - np) / 30.0;
+        }
+        
+        return onehot;
+    }
+    
+    public double[] getOnehotArrayHpSpDiv04p1(int np){
         // 0,1,30,60,90,120
         double[] onehot = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         
-        if(hp >= 120){
+        if(np >= 120){
             onehot[0] = 1;
         }
-        else if(120 > hp && hp >= 90){
-            onehot[0] = (hp - 90) / 30.0;
-            onehot[1] = (120 - hp) / 30.0;
+        else if(120 > np && np >= 90){
+            onehot[0] = (np - 90) / 30.0;
+            onehot[1] = (120 - np) / 30.0;
         }
-        else if(90 > hp && hp >= 60){
-            onehot[1] = (hp - 60) / 30.0;
-            onehot[2] = (90 - hp) / 30.0;
+        else if(90 > np && np >= 60){
+            onehot[1] = (np - 60) / 30.0;
+            onehot[2] = (90 - np) / 30.0;
         }
-        else if(60 > hp && hp >= 30){
-            onehot[2] = (hp - 30) / 30.0;
-            onehot[3] = (60 - hp) / 30.0;
+        else if(60 > np && np >= 30){
+            onehot[2] = (np - 30) / 30.0;
+            onehot[3] = (60 - np) / 30.0;
         }
-        else if(30 > hp && hp >= 1){
-            onehot[3] = (hp - 1) / 29.0;
-            onehot[4] = (30 - hp) / 29.0;
+        else if(30 > np && np >= 1){
+            onehot[3] = (np - 1) / 29.0;
+            onehot[4] = (30 - np) / 29.0;
         }
-        else if(hp == 0){
+        else if(np == 0){
             onehot[5] = 1;
         }
         
