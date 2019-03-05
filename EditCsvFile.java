@@ -75,7 +75,10 @@ public class EditCsvFile {
             if(mode == 71) index = "hp_120over,hp_90,hp_60,hp_30,hp_1,hp_0,lv,sp_100over,sp_75,sp_50,sp_25,sp_0,pt_4over,pt_3,pt_2,pt_1,pt_0,ar_12over,ar_9,ar_6,ar_3,ar_0,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
             if(mode == 72) index = "hp_120over,hp_90,hp_60,hp_30,hp_1,hp_0,lv,sp_120over,sp_90,sp_60,sp_30,sp_0,pt_4over,pt_3,pt_2,pt_1,pt_0,ar_12over,ar_9,ar_6,ar_3,ar_0,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
             if(mode == 73) index = "hp_120over,hp_90,hp_60,hp_30,hp_1,hp_0,lv,sp_120over,sp_90,sp_60,sp_30,sp_1,sp_0,pt_4over,pt_3,pt_2,pt_1,pt_0,ar_12over,ar_9,ar_6,ar_3,ar_0,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
-
+            if(mode == 80) index = "hp,lv,sp,pt,ar_12over,ar_9,ar_6,ar_3,ar_0,st,unknown area,stair,game clear";
+            if(mode == 81) index = "hp,lv,sp,pt_4over,pt_3,pt_2,pt_1,pt_0,ar,st,unknown area,stair,game clear";
+            if(mode == 82) index = "hp,lv,sp,pt,ar,st_4over,st_3,st_2,st_1,st_0,unknown area,stair,game clear";
+            
                         
             int gameCountBefore = -1; // 前回記録したゲームカウント
             int btCount = 0; // 同じゲームカウントでの戦闘回数記録，2回以上で次のゲームカウントへ
@@ -828,6 +831,103 @@ public class EditCsvFile {
                         }
                         else{
                             //System.out.println("i:" + i + ", j:" + j);
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    // eleplusからnewline作成
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    
+                    // lineの上書き
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_Mode" + mode + ".csv"));
+                }
+                
+                // mode80 : csv分割なし, normal(9col) -> only ar onehot(13col)
+                else if(mode == 80){
+                    double[] eleplus = new double[13];
+                    
+                    // eleからeleplus作成
+                    // i : 変換前
+                    // j : 変換後
+                    for(int i=0, j=0; i<9; i++){
+                        if(i == 4){
+                            double[] tmpOnehotAr = getOnehotArrayAr((int)ele[i]);
+                            for(int k=0; k<tmpOnehotAr.length; k++, j++){
+                                eleplus[j] = tmpOnehotAr[k];
+                            }
+                        }
+                        else{
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    // eleplusからnewline作成
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    
+                    // lineの上書き
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_Mode" + mode + ".csv"));
+                }
+                
+                // mode81 : csv分割なし, normal(9col) -> only pt onehot(13col)
+                else if(mode == 81){
+                    double[] eleplus = new double[13];
+                    
+                    // eleからeleplus作成
+                    // i : 変換前
+                    // j : 変換後
+                    for(int i=0, j=0; i<9; i++){
+                        if(i == 3){
+                            // 所持数 -> ワンホット表現
+                            int[] tmpOnehotPt = getOnehotArrayPtorSt((int)ele[i]);
+                            for(int k=0; k<tmpOnehotPt.length; k++, j++){
+                                eleplus[j] = tmpOnehotPt[k];
+                            }
+                        }
+                        else{
+                            eleplus[j++] = ele[i];
+                        }
+                    }
+                    
+                    // eleplusからnewline作成
+                    StringBuilder stb_line_ItemOnehot = new StringBuilder(); 
+                    for(int j = 0; j < eleplus.length; j++){
+                        if(j != eleplus.length - 1) stb_line_ItemOnehot.append(eleplus[j] + ",");
+                        else                        stb_line_ItemOnehot.append((int)eleplus[j]);
+                    }
+                    
+                    // lineの上書き
+                    line = new String(stb_line_ItemOnehot);
+                    
+                    outputFilename = new File(new String(dir + "/" + dir + "_Mode" + mode + ".csv"));
+                }
+                
+                // mode80 : csv分割なし, normal(9col) -> only st onehot(13col)
+                else if(mode == 82){
+                    double[] eleplus = new double[13];
+                    
+                    // eleからeleplus作成
+                    // i : 変換前
+                    // j : 変換後
+                    for(int i=0, j=0; i<9; i++){
+                        if(i == 5){
+                            int[] tmpOnehotSt = getOnehotArrayPtorSt((int)ele[i]);
+                            for(int k=0; k<tmpOnehotSt.length; k++, j++){
+                                eleplus[j] = tmpOnehotSt[k];
+                            }
+                        }
+                        else{
                             eleplus[j++] = ele[i];
                         }
                     }

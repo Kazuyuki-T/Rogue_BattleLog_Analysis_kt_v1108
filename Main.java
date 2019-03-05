@@ -22,8 +22,11 @@ public class Main {
         String csvNames = 
                   //"data_2f_gameclear_newData_onehot_hpDiv10.csv";
                   //"data_2f_gameclear_newData_onehot_allitem.csv";
-                  "data_integration.csv";
-
+                  //"data_3f_gameclear_newData_onehot_allitem_hpDiv04p1_mixdata.csv";
+                  //"data_integration.csv";
+                  "data_0f_btendTiming.csv,data_1f_btendTiming.csv,data_2f_btendTiming.csv,data_3f_btendTiming.csv";
+                  //"log_20181007_212648_bt_0f.csv,log_20181007_212648_bt_1f.csv,log_20181007_212648_bt_2f.csv,log_20181007_212648_bt_3f.csv";
+                
         //String csvFile = "test1.csv";
         
         // mode 0 : 階層ごとに分割
@@ -60,9 +63,12 @@ public class Main {
         // mode71 : csv分割なし, hp(div4p1) + all item onehot (26col) -> + sp([0,25,50,75,100]) (30col)
         // mode72 : csv分割なし, hp(div4p1) + all item onehot (26col) -> + sp([0,30,60,90,120]) (30col)
         // mode73 : csv分割なし, hp(div4p1) + all item onehot (26col) -> + sp([0,1,30,60,90,120]) (31col)
+        // mode80 : csv分割なし, normal(9col) -> only ar onehot(13col)
+        // mode81 : csv分割なし, normal(9col) -> only pt onehot(13col)
+        // mode82 : csv分割なし, normal(9col) -> only st onehot(13col)
         
         
-        int mode = 48;
+        int mode = 20;
         int btLimit = -1; // mode=10で必要，記録する同フロア戦闘数制限
         
         EditCsvFile ecf = new EditCsvFile();
